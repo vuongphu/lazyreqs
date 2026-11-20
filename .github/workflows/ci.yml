@@ -54,7 +54,9 @@ jobs:
 
   test:
     name: Test (Python ${{ matrix.python-version }})
-    runs-on: ubuntu-latest
+    # ubuntu-24.04: the 26.04 image no longer provides Python 3.9 builds
+    # (python-versions only ships 3.9 for 22.04/24.04).
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
