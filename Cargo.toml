@@ -1,0 +1,47 @@
+[package]
+name = "lazyreq"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.85"
+description = "Tokio-powered requests/pyureq drop-in replacement with zero-await lazy concurrency"
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+keywords = ["http", "client", "requests", "async", "tokio"]
+categories = ["api-bindings", "web-programming::http-client"]
+
+[lib]
+name = "_lazyreq"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+pyo3 = { version = "0.30", features = ["extension-module", "abi3-py39"] }
+pythonize = "0.30"
+reqwest = { version = "0.13", default-features = false, features = [
+    "rustls",
+    "http2",
+    "gzip",
+    "brotli",
+    "deflate",
+    "zstd",
+    "socks",
+    "cookies",
+    "multipart",
+    "system-proxy",
+    "charset",
+] }
+tokio = { version = "1", features = [
+    "rt-multi-thread",
+    "net",
+    "time",
+    "sync",
+    "macros",
+] }
+serde_json = "1"
+form_urlencoded = "1"
+
+[profile.release]
+lto = "fat"
+codegen-units = 1
+opt-level = 3
+strip = true
+panic = "abort"

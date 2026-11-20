@@ -1,0 +1,194 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+    tags: ["v*"]
+  pull_request:
+    branches: ["**"]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install ruff
+        run: pip install ruff
+
+      - name: Lint Python (ruff)
+        run: ruff check python/
+
+      - name: Install Rust toolchain (with clippy + rustfmt)
+        shell: bash
+        run: |
+          for attempt in 1 2 3 4; do
+            rustup toolchain install stable --profile minimal --no-self-update \
+              --component clippy --component rustfmt \
+              && rustup default stable \
+              && break
+            echo "Attempt $attempt failed, retrying in $((attempt * 15))s..."
+            sleep $((attempt * 15))
+          done
+
+      - name: Cache Rust build artifacts
+        uses: Swatinem/rust-cache@v2
+
+      - name: Lint Rust (clippy)
+        run: cargo clippy --all-targets -- -D warnings
+
+      - name: Check Rust formatting
+        run: cargo fmt --check
+
+  test:
+    name: Test (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Rust toolchain
+        shell: bash
+        run: |
+          for attempt in 1 2 3 4; do
+            rustup toolchain install stable --profile minimal --no-self-update \
+              && rustup default stable \
+              && break
+            echo "Attempt $attempt failed, retrying in $((attempt * 15))s..."
+            sleep $((attempt * 15))
+          done
+
+      - name: Cache Rust build artifacts
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install maturin
+        run: pip install maturin
+
+      - name: Build and install wheel
+        run: |
+          maturin build --release
+          pip install target/wheels/*.whl
+
+      - name: Install test dependencies
+        run: pip install pytest
+
+      - name: Run tests
+        run: pytest tests/ -v
+
+  build-wheels:
+    name: Build wheels (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # abi3-py39: a single cp39-abi3 wheel per platform/architecture.
+        os: [ubuntu-latest, macos-latest, macos-13, windows-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        shell: bash
+        run: |
+          for attempt in 1 2 3 4; do
+            rustup toolchain install stable --profile minimal --no-self-update \
+              && rustup default stable \
+              && break
+            echo "Attempt $attempt failed, retrying in $((attempt * 15))s..."
+            sleep $((attempt * 15))
+          done
+
+      - name: Cache Rust build artifacts
+        uses: Swatinem/rust-cache@v2
+
+      - name: Build wheels
+        uses: PyO3/maturin-action@v1
+        with:
+          command: build
+          # abi3-py39 + generate-import-lib: one cp39-abi3 wheel per platform,
+          # no Python interpreter required (works on Windows without python3.9).
+          args: --release --out dist
+
+      - name: Build source distribution
+        if: matrix.os == 'ubuntu-latest'
+        uses: PyO3/maturin-action@v1
+        with:
+          command: sdist
+          args: --out dist
+
+      - name: Upload wheels
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ matrix.os }}
+          path: dist/
+
+  release:
+    name: Publish to PyPI + GitHub Release
+    runs-on: ubuntu-latest
+    needs: [lint, test, build-wheels]
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    environment: pypi
+    permissions:
+      id-token: write
+      contents: write   # required for GitHub Release creation
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: wheels-*
+          merge-multiple: true
+          path: dist/
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          generate_release_notes: true
+          body: |
+            ## Installation
+
+            ```
+            pip install lazyreq==${{ github.ref_name }}
+            ```
+
+            Full changelog: https://github.com/${{ github.repository }}/releases
+
+      - name: Update repository About description
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api --method PATCH /repos/${{ github.repository }} \
+            -f description="Tokio-powered requests/pyureq drop-in replacement with zero-await lazy concurrency" \
+            -f homepage="https://pypi.org/project/lazyreq/" \
+            -f topics[]="python" \
+            -f topics[]="rust" \
+            -f topics[]="http" \
+            -f topics[]="requests" \
+            -f topics[]="pyo3" \
+            -f topics[]="tokio" || true
