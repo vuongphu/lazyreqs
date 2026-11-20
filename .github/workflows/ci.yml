@@ -105,7 +105,8 @@ jobs:
       fail-fast: false
       matrix:
         # abi3-py39: a single cp39-abi3 wheel per platform/architecture.
-        os: [ubuntu-latest, macos-latest, macos-13, windows-latest]
+        # macos-latest is arm64; macos-26-intel covers the Intel slice.
+        os: [ubuntu-latest, macos-latest, macos-26-intel, windows-latest]
 
     steps:
       - uses: actions/checkout@v4
