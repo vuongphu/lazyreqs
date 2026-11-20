@@ -1,9 +1,9 @@
-"""``lazyreq`` — a requests/pyureq drop-in replacement powered by Rust.
+"""``lazyreqs`` — a requests/pyureq drop-in replacement powered by Rust.
 
 The package is a 100% API-compatible replacement for both ``pyureq`` and
 ``requests``::
 
-    import lazyreq as requests
+    import lazyreqs as requests
     r = requests.get("https://example.com")
     print(r.status_code, r.text)
 
@@ -11,18 +11,18 @@ It adds *lazy concurrency*: with ``lazy=True`` (or a :class:`LazySession`)
 every call returns a :class:`LazyResponse` immediately while the request runs
 on a shared Tokio runtime.  Nothing ever needs ``await``::
 
-    import lazyreq
+    import lazyreqs
 
-    pending = [lazyreq.get(url, lazy=True) for url in urls]
+    pending = [lazyreqs.get(url, lazy=True) for url in urls]
     bodies = [r.text for r in pending]   # resolves on access, all concurrent
 
 Or defer even JSON parsing::
 
-    data = lazyreq.get(url, lazy_json=True).json()   # a LazyDict
+    data = lazyreqs.get(url, lazy_json=True).json()   # a LazyDict
     print(data["results"])                           # parsed right here
 """
 
-from . import _lazyreq as _lazyreq
+from . import _lazyreqs as _lazyreqs
 from . import exceptions, models, sessions, structures
 from ._version import __version__
 from .exceptions import (
@@ -48,7 +48,7 @@ from .models import LazyResponse, PreparedRequest, Response
 from .sessions import LazySession, Session
 from .structures import CaseInsensitiveDict, LazyDict
 
-__author__ = "lazyreq contributors"
+__author__ = "lazyreqs contributors"
 
 __all__ = [
     "CaseInsensitiveDict",
@@ -107,8 +107,8 @@ def set_default_lazy(value):
 
     Set this once, at startup::
 
-        lazyreq.set_default_lazy(True)
-        lazyreq.get(url)   # now returns a LazyResponse
+        lazyreqs.set_default_lazy(True)
+        lazyreqs.get(url)   # now returns a LazyResponse
 
     Sessions are unaffected; use ``Session(lazy=True)`` or
     ``LazySession()`` for the same effect on a single object.

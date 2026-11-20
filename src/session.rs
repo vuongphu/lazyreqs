@@ -385,7 +385,7 @@ fn parse_files(value: Option<&Bound<'_, PyAny>>) -> PyResult<Vec<FilePart>> {
         let items = pair_items(&item)?;
         if items.len() < 4 {
             return Err(pyo3::exceptions::PyValueError::new_err(
-                "lazyreq: each file entry must be (name, filename, content_type, bytes)",
+                "lazyreqs: each file entry must be (name, filename, content_type, bytes)",
             ));
         }
         let name = proxy::stringify(&items[0])?;
@@ -680,7 +680,7 @@ pub async fn execute(
     semaphore: Arc<Semaphore>,
 ) -> Result<ResponseData, ReqError> {
     let _permit = semaphore.acquire_owned().await.map_err(|_| {
-        ReqError::other("lazyreq: the concurrency semaphore was closed unexpectedly")
+        ReqError::other("lazyreqs: the concurrency semaphore was closed unexpectedly")
     })?;
 
     let started = std::time::Instant::now();
@@ -730,7 +730,7 @@ pub async fn execute(
 // ---------------------------------------------------------------------------
 
 /// Persistent HTTP client with connection pooling and per-session settings.
-#[pyclass(module = "lazyreq._lazyreq")]
+#[pyclass(module = "lazyreqs._lazyreqs")]
 pub struct RustClient {
     inner: Arc<ClientInner>,
     defaults: ClientDefaults,
@@ -828,7 +828,7 @@ impl RustClient {
     }
 
     fn __repr__(&self) -> String {
-        "<lazyreq.RustClient>".to_string()
+        "<lazyreqs.RustClient>".to_string()
     }
 }
 
@@ -845,7 +845,7 @@ fn options_check(py: Python<'_>, options: &ExecOptions) -> PyResult<()> {
     }
     if options.method.trim().is_empty() {
         return Err(pyo3::exceptions::PyValueError::new_err(
-            "lazyreq: HTTP method must not be empty",
+            "lazyreqs: HTTP method must not be empty",
         ));
     }
     Ok(())

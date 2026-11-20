@@ -10,7 +10,7 @@ import json as _json
 import threading
 from urllib.parse import urlencode
 
-from . import _lazyreq
+from . import _lazyreqs
 from ._version import __version__
 from .exceptions import (
     ConnectionError,
@@ -25,7 +25,7 @@ from .structures import CaseInsensitiveDict
 _builtin_ConnectionError = builtins.ConnectionError
 
 _DEFAULT_HEADERS = {
-    "User-Agent": f"lazyreq/{__version__}",
+    "User-Agent": f"lazyreqs/{__version__}",
     # Only advertise encodings the Rust core can actually decode.
     "Accept-Encoding": "gzip, deflate, br, zstd",
     "Accept": "*/*",
@@ -123,7 +123,7 @@ def _normalize_files(files):
             elif len(value) >= 3:
                 filename, content, content_type = value[0], value[1], value[2]
             else:
-                raise ValueError("lazyreq: malformed file tuple")
+                raise ValueError("lazyreqs: malformed file tuple")
         else:
             filename, content = None, value
 
@@ -284,7 +284,7 @@ class Session:
 
     Compatible with ``requests.Session``/``pyureq.Session``::
 
-        with lazyreq.Session() as s:
+        with lazyreqs.Session() as s:
             s.headers.update({"X-MyHeader": "value"})
             r = s.get("https://example.com")
     """
@@ -303,7 +303,7 @@ class Session:
         self.max_concurrency = 100
         self.trust_env = True
         self._cookie_lock = threading.Lock()
-        self._client = _lazyreq.RustClient(
+        self._client = _lazyreqs.RustClient(
             verify=True,
             timeout=None,
             no_proxy_all=False,
@@ -464,7 +464,7 @@ class Session:
             self._client.close()
 
     def __repr__(self):
-        return "<lazyreq.Session>"
+        return "<lazyreqs.Session>"
 
 
 class LazySession(Session):
@@ -487,7 +487,7 @@ class LazySession(Session):
         return super().request(method, url, **kwargs)
 
     def __repr__(self):
-        return "<lazyreq.LazySession>"
+        return "<lazyreqs.LazySession>"
 
 
 def session():

@@ -1,4 +1,4 @@
-"""Benchmarks for ``lazyreq``'s lazy concurrency and blocking modes.
+"""Benchmarks for ``lazyreqs``'s lazy concurrency and blocking modes.
 
 Usage::
 
@@ -22,7 +22,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT / "tests"))
 
-import lazyreq
+import lazyreqs
 
 
 def _local_server():
@@ -38,7 +38,7 @@ def time_call(fn):
 
 
 def bench_blocking(base_url, count):
-    session = lazyreq.Session()
+    session = lazyreqs.Session()
     start = time.perf_counter()
     responses = [session.get(base_url) for _ in range(count)]
     elapsed = time.perf_counter() - start
@@ -49,7 +49,7 @@ def bench_blocking(base_url, count):
 
 def bench_lazy_dispatch(base_url, count):
     """Measure the cost of firing requests without resolving them."""
-    session = lazyreq.LazySession()
+    session = lazyreqs.LazySession()
     start = time.perf_counter()
     pending = [session.get(base_url) for _ in range(count)]
     dispatch = time.perf_counter() - start
@@ -61,7 +61,7 @@ def bench_lazy_dispatch(base_url, count):
 
 
 def bench_lazy_resolve(base_url, count):
-    session = lazyreq.LazySession()
+    session = lazyreqs.LazySession()
     pending = [session.get(base_url) for _ in range(count)]
     start = time.perf_counter()
     for response in pending:
@@ -72,7 +72,7 @@ def bench_lazy_resolve(base_url, count):
 
 
 def bench_lazy_json(base_url, count):
-    session = lazyreq.LazySession()
+    session = lazyreqs.LazySession()
     pending = [
         session.get(base_url, lazy_json=True) for _ in range(count)
     ]
@@ -86,7 +86,7 @@ def bench_lazy_json(base_url, count):
 
 
 def bench_single_latency(base_url, samples):
-    session = lazyreq.Session()
+    session = lazyreqs.Session()
     timings = []
     for _ in range(samples):
         start = time.perf_counter()
@@ -100,7 +100,7 @@ def bench_compare(count, delay, server):
     """Time ``requests``/``pyureq`` on the same workload.
 
     Each library is measured twice: a blocking loop over a single ``Session``
-    (like-for-like with ``lazyreq`` blocking mode) and a thread pool with the
+    (like-for-like with ``lazyreqs`` blocking mode) and a thread pool with the
     same parallelism as the lazy run (what those libraries need for
     concurrency).
     """
@@ -165,7 +165,7 @@ def main(argv=None):
 
     try:
         count = args.requests
-        print(f"lazyreq benchmark: {count} requests to {base_url}\n")
+        print(f"lazyreqs benchmark: {count} requests to {base_url}\n")
 
         sequential = bench_blocking(base_url, count)
         print_row("blocking (sequential)", sequential, count)
@@ -196,7 +196,7 @@ def main(argv=None):
             for name, (seconds, _) in others.items():
                 print_row(f"  {name}", seconds, count)
             for name, (seconds, _) in others.items():
-                print(f"  lazyreq lazy vs {name}: "
+                print(f"  lazyreqs lazy vs {name}: "
                       f"{seconds / lazy_total:5.2f}x")
     finally:
         if server is not None:

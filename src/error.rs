@@ -1,6 +1,6 @@
-//! Exception mapping for the `lazyreq.exceptions` hierarchy.
+//! Exception mapping for the `lazyreqs.exceptions` hierarchy.
 //!
-//! The exception *types* live in Python (``lazyreq/exceptions.py``) so that the
+//! The exception *types* live in Python (``lazyreqs/exceptions.py``) so that the
 //! hierarchy mirrors ``requests.exceptions`` exactly.  This module only
 //! classifies transport failures and builds the corresponding Python
 //! exception instance, attaching ``response``/``request`` metadata when the
@@ -151,7 +151,7 @@ impl ReqError {
         request: Option<&Bound<'_, PyAny>>,
     ) -> PyErr {
         let message = self.message.clone();
-        let exceptions = py.import("lazyreq.exceptions");
+        let exceptions = py.import("lazyreqs.exceptions");
 
         if let Ok(module) = exceptions {
             if let Ok(class) = module.getattr(self.kind.class_name()) {

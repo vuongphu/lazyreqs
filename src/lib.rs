@@ -1,7 +1,7 @@
-//! `lazyreq` — a Tokio + `reqwest` engine with a `requests`/`pyureq`
+//! `lazyreqs` — a Tokio + `reqwest` engine with a `requests`/`pyureq`
 //! compatible Python surface and zero-``await`` lazy concurrency.
 //!
-//! Python API lives in ``python/lazyreq``; this crate provides the transport:
+//! Python API lives in ``python/lazyreqs``; this crate provides the transport:
 //! [`RustClient`](session::RustClient), [`RawResponse`](response::RawResponse)
 //! and [`LazyResponse`](lazy::LazyResponse).
 
@@ -34,15 +34,15 @@ pub fn rt() -> &'static Runtime {
     RUNTIME.get_or_init(|| {
         Builder::new_multi_thread()
             .worker_threads(worker_threads())
-            .thread_name("lazyreq-worker")
+            .thread_name("lazyreqs-worker")
             .enable_all()
             .build()
-            .expect("lazyreq: failed to start the Tokio runtime")
+            .expect("lazyreqs: failed to start the Tokio runtime")
     })
 }
 
 #[pymodule]
-fn _lazyreq(module: &Bound<'_, PyModule>) -> PyResult<()> {
+fn _lazyreqs(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_class::<session::RustClient>()?;
     module.add_class::<response::RawResponse>()?;
     module.add_class::<lazy::LazyResponse>()?;

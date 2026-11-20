@@ -174,7 +174,7 @@ jobs:
             ## Installation
 
             ```
-            pip install lazyreq==${{ github.ref_name }}
+            pip install lazyreqs==${{ github.ref_name }}
             ```
 
             Full changelog: https://github.com/${{ github.repository }}/releases
@@ -185,7 +185,7 @@ jobs:
         run: |
           gh api --method PATCH /repos/${{ github.repository }} \
             -f description="Tokio-powered requests/pyureq drop-in replacement with zero-await lazy concurrency" \
-            -f homepage="https://pypi.org/project/lazyreq/" \
+            -f homepage="https://pypi.org/project/lazyreqs/" \
             -f topics[]="python" \
             -f topics[]="rust" \
             -f topics[]="http" \

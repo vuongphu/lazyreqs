@@ -1,5 +1,5 @@
 [package]
-name = "lazyreq"
+name = "lazyreqs"
 version = "0.1.0"
 edition = "2021"
 rust-version = "1.85"
@@ -10,7 +10,7 @@ keywords = ["http", "client", "requests", "async", "tokio"]
 categories = ["api-bindings", "web-programming::http-client"]
 
 [lib]
-name = "_lazyreq"
+name = "_lazyreqs"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]

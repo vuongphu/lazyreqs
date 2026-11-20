@@ -3,13 +3,13 @@ requires = ["maturin>=1.5,<2.0"]
 build-backend = "maturin"
 
 [project]
-name = "lazyreq"
+name = "lazyreqs"
 version = "0.1.0"
 description = "Tokio-powered requests/pyureq drop-in replacement with zero-await lazy concurrency"
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "MIT OR Apache-2.0" }
-authors = [{ name = "lazyreq contributors" }]
+authors = [{ name = "lazyreqs contributors" }]
 keywords = ["http", "client", "requests", "pyureq", "asyncio", "tokio", "rust"]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -28,7 +28,7 @@ test = ["pytest>=7.0"]
 
 [tool.maturin]
 python-source = "python"
-module-name = "lazyreq._lazyreq"
+module-name = "lazyreqs._lazyreqs"
 features = ["pyo3/extension-module"]
 strip = true
 

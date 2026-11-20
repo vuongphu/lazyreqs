@@ -1,18 +1,18 @@
-# lazyreq
+# lazyreqs
 
-`lazyreq` is a high-performance HTTP library for Python built on Rust
+`lazyreqs` is a high-performance HTTP library for Python built on Rust
 (`PyO3` + `reqwest` + `Tokio`). It is designed as a **100% API-compatible
 drop-in replacement for both `pyureq` and `requests`**, and adds zero-`await`
 concurrent execution through `LazyResponse` and `LazyDict`.
 
 ```python
-import lazyreq as requests   # or: import lazyreq as pyureq
+import lazyreqs as requests   # or: import lazyreqs as pyureq
 
 r = requests.get("https://example.com")
 print(r.status_code, r.text)
 
 # Lazy concurrency: fire every request, resolve on access, never await.
-pending = [lazyreq.get(url, lazy=True) for url in urls]
+pending = [lazyreqs.get(url, lazy=True) for url in urls]
 bodies = [r.text for r in pending]
 ```
 
@@ -24,18 +24,18 @@ bodies = [r.text for r in pending]
 few hundred concurrent calls block one thread each. `pyureq` already runs
 requests on a Rust core, but still returns them one at a time.
 
-`lazyreq` keeps the exact API you already know and changes only *when* the
+`lazyreqs` keeps the exact API you already know and changes only *when* the
 response is materialised:
 
-- **Blocking mode** — identical to `requests`/`pyureq`. `lazyreq.get(url)`
+- **Blocking mode** — identical to `requests`/`pyureq`. `lazyreqs.get(url)`
   returns a fully populated `Response`, releasing the GIL while the network
   I/O runs.
-- **Lazy mode** — `lazyreq.get(url, lazy=True)` returns a `LazyResponse` in
+- **Lazy mode** — `lazyreqs.get(url, lazy=True)` returns a `LazyResponse` in
   microseconds. The request is already running on a shared Tokio runtime; the
   first attribute access (`r.status_code`, `r.text`, `r.json()`, …) blocks
   until it finishes. Every request in a batch is in flight at once, with no
   `await` and no thread per request.
-- **Lazy JSON** — `lazyreq.get(url, lazy_json=True).json()` returns a
+- **Lazy JSON** — `lazyreqs.get(url, lazy_json=True).json()` returns a
   `LazyDict`: a real `dict` subclass that parses the JSON document only when
   its contents are first touched.
 
@@ -46,7 +46,7 @@ HTTP/1.1 keep-alive and HTTP/2 multiplexing, a configurable semaphore
 ## Installation
 
 ```bash
-pip install lazyreq
+pip install lazyreqs
 
 # from a checkout
 maturin develop --release
@@ -59,16 +59,16 @@ The wheel targets `abi3-py39`, so a single build runs on CPython 3.9+.
 ### requests / pyureq parity
 
 ```python
-import lazyreq
+import lazyreqs
 
-r = lazyreq.get("https://example.com", params={"q": "hello"}, timeout=5)
-r = lazyreq.post("https://example.com/api", json={"a": 1}, auth=("user", "pass"))
-r = lazyreq.put(url, data={"form": "value"})
-r = lazyreq.patch(url, json={"patch": True})
-r = lazyreq.delete(url)
-r = lazyreq.head(url, allow_redirects=False)
-r = lazyreq.options(url)
-r = lazyreq.request("GET", url, headers={"X-Token": "..."})
+r = lazyreqs.get("https://example.com", params={"q": "hello"}, timeout=5)
+r = lazyreqs.post("https://example.com/api", json={"a": 1}, auth=("user", "pass"))
+r = lazyreqs.put(url, data={"form": "value"})
+r = lazyreqs.patch(url, json={"patch": True})
+r = lazyreqs.delete(url)
+r = lazyreqs.head(url, allow_redirects=False)
+r = lazyreqs.options(url)
+r = lazyreqs.request("GET", url, headers={"X-Token": "..."})
 ```
 
 Response attributes and methods:
@@ -94,7 +94,7 @@ r.iter_lines()
 Sessions:
 
 ```python
-with lazyreq.Session() as s:
+with lazyreqs.Session() as s:
     s.headers.update({"X-API": "key"})
     s.auth = ("user", "pass")
     s.cookies["session"] = "abc"
@@ -106,15 +106,15 @@ with lazyreq.Session() as s:
 ### Lazy concurrency (no `await`)
 
 ```python
-import lazyreq
+import lazyreqs
 
-with lazyreq.LazySession() as s:          # s.lazy == True
+with lazyreqs.LazySession() as s:          # s.lazy == True
     pending = [s.get(url) for url in urls]  # fires all requests immediately
     print([r.status_code for r in pending])  # resolves on first access
 
 # Per-call
-pending = lazyreq.get(url, lazy=True)
-assert isinstance(pending, lazyreq.Response)   # LazyResponse subclasses Response
+pending = lazyreqs.get(url, lazy=True)
+assert isinstance(pending, lazyreqs.Response)   # LazyResponse subclasses Response
 pending.resolve()                              # explicit
 pending.wait()                                 # alias
 pending.is_ready()                             # non-blocking check
@@ -128,16 +128,16 @@ share a single background fetch.
 `lazy=` can be pinned at three levels; the most specific wins:
 
 ```python
-lazyreq.set_default_lazy(True)   # process-wide default for lazyreq.get(...)
-lazyreq.default_lazy()           # -> True
+lazyreqs.set_default_lazy(True)   # process-wide default for lazyreqs.get(...)
+lazyreqs.default_lazy()           # -> True
 
-s = lazyreq.Session(lazy=True)   # per session, set at construction
+s = lazyreqs.Session(lazy=True)   # per session, set at construction
 s.lazy = True                    # ...or as an attribute
 
-with lazyreq.LazySession() as s: # preset: lazy=True
+with lazyreqs.LazySession() as s: # preset: lazy=True
     ...
 
-lazyreq.get(url, lazy=False)     # per-call override
+lazyreqs.get(url, lazy=False)     # per-call override
 ```
 
 `set_default_lazy(True)` makes the top-level helpers return `LazyResponse`
@@ -148,7 +148,7 @@ surface when the response is first touched instead of at the call site.
 ### Lazy JSON
 
 ```python
-data = lazyreq.get(url, lazy_json=True).json()  # LazyDict, still unparsed
+data = lazyreqs.get(url, lazy_json=True).json()  # LazyDict, still unparsed
 print("parsed lazily", data["results"])         # parse happens here
 assert isinstance(data, dict)                   # it is a real dict
 ```
@@ -157,42 +157,42 @@ assert isinstance(data, dict)                   # it is a real dict
 
 ```python
 # Limit in-flight requests (semaphore), default 100
-s = lazyreq.Session()
+s = lazyreqs.Session()
 s.max_concurrency = 8
 
 # Or per request
-lazyreq.get(url, lazy=True, max_concurrency=4)
+lazyreqs.get(url, lazy=True, max_concurrency=4)
 ```
 
 ### Proxies
 
 ```python
-lazyreq.get(url, proxies={"http://": "http://user:pass@proxy:3128"})
-lazyreq.get(url, proxies={"all": "socks5://127.0.0.1:1080"},
+lazyreqs.get(url, proxies={"http://": "http://user:pass@proxy:3128"})
+lazyreqs.get(url, proxies={"all": "socks5://127.0.0.1:1080"},
             no_proxy="localhost,127.0.0.1")     # bypass list
-lazyreq.get(url, proxies={"http://": ""})      # disable all proxies
-lazyreq.get(url, trust_env=False)              # ignore *_PROXY env vars
+lazyreqs.get(url, proxies={"http://": ""})      # disable all proxies
+lazyreqs.get(url, trust_env=False)              # ignore *_PROXY env vars
 ```
 
 ### Exceptions
 
-`lazyreq.exceptions` mirrors `requests.exceptions` and `pyureq.exceptions`;
+`lazyreqs.exceptions` mirrors `requests.exceptions` and `pyureq.exceptions`;
 each exception carries `.response` and `.request` when available.
 
 ```python
-import lazyreq
+import lazyreqs
 
 try:
-    lazyreq.get("https://example.com", timeout=1)
-except lazyreq.Timeout:
+    lazyreqs.get("https://example.com", timeout=1)
+except lazyreqs.Timeout:
     pass
-except lazyreq.ProxyError:
+except lazyreqs.ProxyError:
     pass
-except lazyreq.ConnectionError:
+except lazyreqs.ConnectionError:
     pass
-except lazyreq.HTTPError as exc:
+except lazyreqs.HTTPError as exc:
     print(exc.response.status_code, exc.request.method)
-except lazyreq.RequestException:
+except lazyreqs.RequestException:
     pass
 ```
 
@@ -257,13 +257,13 @@ comparison on the same local server and workload:
   requests (64 threads)               0.137s       1.37 ms/req
   pyureq blocking                     5.073s      50.73 ms/req
   pyureq (64 threads)                 0.116s       1.16 ms/req
-  lazyreq lazy vs pyureq blocking:       72.51x
-  lazyreq lazy vs pyureq (64 threads):    1.66x
+  lazyreqs lazy vs pyureq blocking:       72.51x
+  lazyreqs lazy vs pyureq (64 threads):    1.66x
 ```
 
 `--compare` runs `requests` and `pyureq` on the identical workload, both as a
 blocking loop over one `Session` and through a 64-thread pool — the way those
-libraries get concurrency. `lazyreq` matches `pyureq` per request in blocking
+libraries get concurrency. `lazyreqs` matches `pyureq` per request in blocking
 mode and beats the thread-pool approach with no threads, no pool sizing and no
 per-request `lazy=True` noise.
 
@@ -279,7 +279,7 @@ take 50 ms finish in ~130 ms instead of 5 s.
 ## Architecture
 
 ```
-Python layer  (python/lazyreq/)
+Python layer  (python/lazyreqs/)
   __init__.py      top-level API + lazy_session()
   sessions.py      Session/LazySession, kwargs merge, dispatch
   models.py        PreparedRequest, Response, LazyResponse
@@ -294,7 +294,7 @@ Rust layer    (src/)
   response.rs  RawResponse (status/headers/body/encoding/cookies)
   lazy.rs      LazyResponse: oneshot receiver + Condvar, no GIL held
   proxy.rs     proxies/no_proxy handling (http/https/socks/all)
-  error.rs     reqwest error → lazyreq.exceptions classification
+  error.rs     reqwest error → lazyreqs.exceptions classification
 ```
 
 The Python layer owns *configuration* (headers, cookies, proxies, timeouts,
@@ -332,7 +332,7 @@ Release with the built artifacts attached.
 1. On PyPI, open the project → **Publishing** → **Add a new pending publisher**.
 2. Choose **GitHub Actions** and fill in:
    - owner: your GitHub user/organisation
-   - repository: `lazyreq`
+   - repository: `lazyreqs`
    - workflow file: `ci.yml`
    - environment: `pypi`
 3. That's it — the release job's `id-token: write` permission authenticates it.
@@ -341,7 +341,7 @@ Release with the built artifacts attached.
 
 ```bash
 # 1. bump the version in all three places
-#    Cargo.toml, pyproject.toml, python/lazyreq/_version.py
+#    Cargo.toml, pyproject.toml, python/lazyreqs/_version.py
 # 2. commit, tag and push
 git add -A && git commit -m "Release 0.1.1"
 git tag v0.1.1

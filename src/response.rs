@@ -1,5 +1,5 @@
 //! Response data captured by the Tokio worker and exposed to Python as
-//! [`RawResponse`].  The user-facing ``lazyreq.Response`` model wraps this
+//! [`RawResponse`].  The user-facing ``lazyreqs.Response`` model wraps this
 //! object and adds the ``requests``/``pyureq`` API surface.
 
 use pyo3::prelude::*;
@@ -30,7 +30,7 @@ pub struct RequestInfo {
     pub proxy: bool,
 }
 
-#[pyclass(frozen, module = "lazyreq._lazyreq")]
+#[pyclass(frozen, module = "lazyreqs._lazyreqs")]
 pub struct RawResponse {
     pub status_code: u16,
     pub reason: String,

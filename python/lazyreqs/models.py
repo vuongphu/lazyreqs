@@ -13,9 +13,9 @@ from datetime import timedelta
 from .structures import CaseInsensitiveDict, LazyDict
 
 try:  # pragma: no cover - optional dependency
-    from . import _lazyreq
+    from . import _lazyreqs
 except ImportError:  # pragma: no cover - source checkout without build
-    _lazyreq = None
+    _lazyreqs = None
 
 from .exceptions import HTTPError, RequestException
 
@@ -93,7 +93,7 @@ class PreparedRequest:
 
 
 class Response:
-    """The response object returned by ``lazyreq.get``/``Session.get`` (and
+    """The response object returned by ``lazyreqs.get``/``Session.get`` (and
     every other convenience function).
 
     Drop-in compatible with ``requests.Response`` and ``pyureq.Response``.

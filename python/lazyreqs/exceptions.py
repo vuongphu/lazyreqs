@@ -27,7 +27,7 @@ __all__ = [
 
 
 class RequestException(IOError):
-    """Base class for all ``lazyreq`` exceptions."""
+    """Base class for all ``lazyreqs`` exceptions."""
 
     def __init__(self, *args, response=None, request=None, **kwargs):
         self.response = response

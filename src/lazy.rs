@@ -64,7 +64,7 @@ impl LazyInner {
 }
 
 /// Handle for an in-flight request.
-#[pyclass(module = "lazyreq._lazyreq")]
+#[pyclass(module = "lazyreqs._lazyreqs")]
 pub struct LazyResponse {
     inner: Arc<LazyInner>,
 }
@@ -97,11 +97,11 @@ impl LazyResponse {
                 .detach(|| crate::rt().block_on(receiver))
                 .unwrap_or_else(|_| {
                     Err(ReqError::other(
-                        "lazyreq: background request was cancelled before completion",
+                        "lazyreqs: background request was cancelled before completion",
                     ))
                 }),
             None => Err(ReqError::other(
-                "lazyreq: background request was already consumed",
+                "lazyreqs: background request was already consumed",
             )),
         };
 

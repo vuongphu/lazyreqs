@@ -1,4 +1,4 @@
-"""Type stubs for the compiled ``lazyreq._lazyreq`` extension module."""
+"""Type stubs for the compiled ``lazyreqs._lazyreqs`` extension module."""
 
 from typing import Any
 

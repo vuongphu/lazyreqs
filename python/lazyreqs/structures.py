@@ -1,4 +1,4 @@
-"""Data structures used by ``lazyreq``.
+"""Data structures used by ``lazyreqs``.
 
 ``CaseInsensitiveDict`` mirrors ``requests.structures.CaseInsensitiveDict``
 (implemented on ``MutableMapping``, as upstream does).  ``LazyDict`` is a real

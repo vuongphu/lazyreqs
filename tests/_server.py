@@ -18,7 +18,7 @@ _JSON = {"hello": "world", "nested": {"a": [1, 2, 3]}, "unicode": "héllo ☃"}
 
 class _Handler(BaseHTTPRequestHandler):
     protocol_version = "HTTP/1.1"
-    server_version = "lazyreq-test/1.0"
+    server_version = "lazyreqs-test/1.0"
 
     # -- plumbing ---------------------------------------------------------
     def log_message(self, *args):  # silence test output
@@ -63,7 +63,7 @@ class _Handler(BaseHTTPRequestHandler):
         elif path == "/json":
             self._send_json(_JSON)
         elif path == "/text":
-            self._send(200, "hello lazyreq", None, "text/plain; charset=utf-8")
+            self._send(200, "hello lazyreqs", None, "text/plain; charset=utf-8")
         elif path == "/latin1":
             self._send(
                 200, "héllo".encode("latin-1"), None, "text/plain; charset=iso-8859-1"
@@ -130,7 +130,7 @@ class _Handler(BaseHTTPRequestHandler):
             self.send_header("Content-Type", "text/plain")
             self.send_header("Content-Length", "11")
             self.end_headers()
-            for chunk in (b"hello ", b"lazyreq"):
+            for chunk in (b"hello ", b"lazyreqs"):
                 self.wfile.write(chunk)
                 self.wfile.flush()
                 time.sleep(0.05)
