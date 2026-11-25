@@ -326,29 +326,3 @@ pull request:
 
 On a `v*` tag push, a final job publishes to PyPI and creates the GitHub
 Release with the built artifacts attached.
-
-### Publishing setup (one-time, trusted publishing / OIDC — no token stored)
-
-1. On PyPI, open the project → **Publishing** → **Add a new pending publisher**.
-2. Choose **GitHub Actions** and fill in:
-   - owner: your GitHub user/organisation
-   - repository: `lazyreqs`
-   - workflow file: `ci.yml`
-   - environment: `pypi`
-3. That's it — the release job's `id-token: write` permission authenticates it.
-
-### Cutting a release
-
-```bash
-# 1. bump the version in all three places
-#    Cargo.toml, pyproject.toml, python/lazyreqs/_version.py
-# 2. commit, tag and push
-git add -A && git commit -m "Release 0.1.1"
-git tag v0.1.1
-git push origin main --follow-tags
-```
-
-The tag push triggers the build matrix; the `release` job waits for every
-matrix leg, downloads the wheels, publishes them to PyPI with
-`pypa/gh-action-pypi-publish`, then creates the release with
-`softprops/action-gh-release`.
