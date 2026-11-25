@@ -8,6 +8,11 @@ on:
     branches: ["**"]
   workflow_dispatch:
 
+# Least privilege for push/PR jobs (incl. fork PRs once the repo is public).
+# The release job overrides this with id-token/contents write.
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
